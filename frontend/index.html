@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Churn Predictor AI</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="brand">
+                <div class="logo"></div>
+                <h2>Churn AI</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active" onclick="switchTab('predict')">
+                    <span class="icon">🔮</span> Prediction
+                </li>
+                <li onclick="switchTab('monitoring')">
+                    <span class="icon">🛡️</span> Guardrails
+                </li>
+                <li onclick="switchTab('dashboard')">
+                    <span class="icon">📊</span> Dashboard
+                </li>
+                <li onclick="switchTab('mlflow')">
+                    <span class="icon">📈</span> MLflow Runs
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header>
+                <div class="header-info">
+                    <h1>Production ML Services</h1>
+                    <p>Live inference and monitoring telemetry</p>
+                </div>
+            </header>
+
+            <!-- Dashboard View -->
+            <section id="dashboard" class="tab-content">
+                <div class="stats-grid">
+                    <div class="stat-card glass">
+                        <h3>Total Predictions</h3>
+                        <h2 id="total-preds">--</h2>
+                    </div>
+                    <div class="stat-card glass alert">
+                        <h3>High Risk</h3>
+                        <h2 id="high-risk-preds">--</h2>
+                    </div>
+                    <div class="stat-card glass" style="border-top: 3px solid var(--accent-warn);">
+                        <h3>Medium Risk</h3>
+                        <h2 id="medium-risk-preds">--</h2>
+                    </div>
+                    <div class="stat-card glass" style="border-top: 3px solid var(--accent-green);">
+                        <h3>Low Risk</h3>
+                        <h2 id="low-risk-preds">--</h2>
+                    </div>
+                    <div class="stat-card glass alert">
+                        <h3>Guardrail Anomalies</h3>
+                        <h2 id="anomalies-count">--</h2>
+                    </div>
+                </div>
+
+                <div class="charts-container glass">
+                    <div class="chart-box">
+                        <canvas id="riskDistributionChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Predict View -->
+            <section id="predict" class="tab-content active">
+                <div class="prediction-container glass">
+                    <h2>Run Churn Inference</h2>
+                    <form id="predict-form" class="predict-grid">
+                        <!-- Demographics -->
+                        <div class="form-group"><label>Gender</label><select id="gender">
+                                <option>Female</option>
+                                <option>Male</option>
+                            </select></div>
+                        <div class="form-group"><label>Senior Citizen (1/0)</label><select id="SeniorCitizen">
+                                <option>0</option>
+                                <option>1</option>
+                            </select></div>
+                        <div class="form-group"><label>Partner</label><select id="Partner">
+                                <option>Yes</option>
+                                <option>No</option>
+                            </select></div>
+                        <div class="form-group"><label>Dependents</label><select id="Dependents">
+                                <option>No</option>
+                                <option>Yes</option>
+                            </select></div>
+
+                        <!-- Account -->
+                        <div class="form-group"><label>Tenure (months)</label><input type="number" id="tenure"
+                                value="12" min="0"></div>
+                        <div class="form-group"><label>Monthly Charges</label><input type="number" step="0.01"
+                                id="MonthlyCharges" value="50.0"></div>
+                        <div class="form-group"><label>Total Charges</label><input type="number" step="0.01"
+                                id="TotalCharges" value="600.0"></div>
+
+                        <!-- Services -->
+                        <div class="form-group"><label>Phone Service</label><select id="PhoneService">
+                                <option>Yes</option>
+                                <option>No</option>
+                            </select></div>
+                        <div class="form-group"><label>Multiple Lines</label><select id="MultipleLines">
+                                <option>No</option>
+                                <option>Yes</option>
+                                <option>No phone service</option>
+                            </select></div>
+                        <div class="form-group"><label>Internet</label><select id="InternetService">
+                                <option>DSL</option>
+                                <option>Fiber optic</option>
+                                <option>No</option>
+                            </select></div>
+                        <div class="form-group"><label>Security</label><select id="OnlineSecurity">
+                                <option>No</option>
+                                <option>Yes</option>
+                                <option>No internet service</option>
+                            </select></div>
+                        <div class="form-group"><label>Backup</label><select id="OnlineBackup">
+                                <option>No</option>
+                                <option>Yes</option>
+                                <option>No internet service</option>
+                            </select></div>
+                        <div class="form-group"><label>Protection</label><select id="DeviceProtection">
+                                <option>No</option>
+                                <option>Yes</option>
+                                <option>No internet service</option>
+                            </select></div>
+                        <div class="form-group"><label>Support</label><select id="TechSupport">
+                                <option>No</option>
+                                <option>Yes</option>
+                                <option>No internet service</option>
+                            </select></div>
+                        <div class="form-group"><label>Streaming TV</label><select id="StreamingTV">
+                                <option>No</option>
+                                <option>Yes</option>
+                                <option>No internet service</option>
+                            </select></div>
+                        <div class="form-group"><label>Streaming Movies</label><select id="StreamingMovies">
+                                <option>No</option>
+                                <option>Yes</option>
+                                <option>No internet service</option>
+                            </select></div>
+
+                        <!-- Billing -->
+                        <div class="form-group"><label>Contract</label><select id="Contract">
+                                <option>Month-to-month</option>
+                                <option>One year</option>
+                                <option>Two year</option>
+                            </select></div>
+                        <div class="form-group"><label>Paperless</label><select id="PaperlessBilling">
+                                <option>Yes</option>
+                                <option>No</option>
+                            </select></div>
+                        <div class="form-group"><label>Payment</label><select id="PaymentMethod">
+                                <option>Electronic check</option>
+                                <option>Mailed check</option>
+                                <option>Bank transfer (automatic)</option>
+                                <option>Credit card (automatic)</option>
+                            </select></div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn primary" onclick="submitPrediction()">Predict
+                                Churn</button>
+                        </div>
+                    </form>
+
+                    <!-- Prediction Result UI -->
+                    <div id="result-box" class="result-box" style="display:none;">
+                        <h3>Prediction Result</h3>
+                        <div class="result-details">
+                            <div class="result-item"><strong>Risk Level:</strong> <span id="res-risk">Pending</span>
+                            </div>
+                            <div class="result-item"><strong>Probability:</strong> <span id="res-prob">0%</span></div>
+                            <div class="result-item"><strong>Drift Score:</strong> <span id="res-drift">0</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Batch Prediction UI -->
+                    <div class="prediction-container glass" style="margin-top: 2rem;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                            <h2><span class="icon">📁</span> Batch Prediction</h2>
+                        </div>
+                        <p style="color:var(--text-secondary); margin-bottom:1.5rem; font-size:0.95rem;">
+                            Upload a CSV file containing multiple customer records to run churn predictions in bulk. The
+                            system will automatically download the results.
+                        </p>
+
+                        <form id="batch-form"
+                            style="display: flex; flex-direction: column; gap: 1.5rem; align-items: center;">
+                            <label for="batch-file" class="file-upload-wrapper glass"
+                                style="width: 100%; text-align: center; padding: 3rem 2rem; border: 2px dashed var(--accent-glow); border-radius: 12px; cursor: pointer; transition: all 0.3s ease;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">📄</div>
+                                <h3 id="file-name-display" style="color: var(--text-primary); margin-bottom: 0.5rem;">
+                                    Click or Drag & Drop CSV Here</h3>
+                                <p style="color: var(--text-secondary); font-size: 0.85rem;">Max file size: 50MB. Make
+                                    sure headers exactly match training features.</p>
+                                <input type="file" id="batch-file" accept=".csv" required style="display: none;"
+                                    onchange="updateFileName()">
+                            </label>
+
+                            <button type="button" class="btn primary" onclick="submitBatchPrediction()" id="batch-btn"
+                                style="width: 100%; max-width: 300px; padding: 1rem;">
+                                Run Bulk Inference
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Monitoring View -->
+            <section id="monitoring" class="tab-content">
+                <div class="monitoring-container glass">
+                    <h2>Live ML Inference Logs <span class="pulse"></span></h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Result</th>
+                                <th>Probability</th>
+                                <th>Drift Score</th>
+                                <th>Anomaly</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs-table-body">
+                            <!-- JS populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- MLflow View -->
+            <section id="mlflow" class="tab-content">
+                <div class="mlflow-container glass" style="margin: 2rem; padding: 2rem;">
+                    <h2>Latest MLflow Run Results</h2>
+                    <div id="mlflow-content">
+                        <p>Loading metrics...</p>
+                    </div>
+                    <div class="charts-container glass" style="margin-top: 2rem;">
+                        <div class="chart-box">
+                            <canvas id="mlflowMetricsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>
